@@ -12,7 +12,7 @@ import (
 
 const (
 	pathToLocalList = "config/test.csv"
-	secInDay        = 86400
+	MinInDay        = 1440
 )
 
 type Train struct {
@@ -41,7 +41,7 @@ func parse(info *Info, pathToList string) {
 		log.Panic(err)
 	}
 	defer file.Close()
-	data := make([]byte, 50*250)
+	data := make([]byte, 64*250)
 	tr := Train{}
 	for {
 		_, err := file.Read(data)
@@ -131,11 +131,46 @@ func (info *Info) ShowAll() {
 	}
 }
 
+func (info *Info) GetListOfCity() []int {
+	list := make([]int, 0)
+	for i := 0; i < len(info.Trains); i++ {
+		var buffer bool
+		for _, station := range list {
+			if info.Trains[i].ArrivalStation == station {
+				buffer = true
+				break
+			}
+		}
+		if !buffer {
+			list = append(list, info.Trains[i].ArrivalStation)
+		}
+	}
+	fmt.Println(list)
+	return list
+}
+
+func (info *Info) GetMinPrice(departures, arrival int) (float32, Train) {
+	var min float32 = 10000000
+	var trainWithMinPrice Train
+	for _, train := range info.Trains {
+		if train.ArrivalStation == arrival && train.DeparturesStation == departures {
+			if train.Price < min {
+				min = train.Price
+				trainWithMinPrice = train
+			}
+		}
+	}
+
+	return min, trainWithMinPrice
+}
+
 func ModelInit() *Info {
 	info := Info{}
 	info.Trains = make([]Train, 0)
 	parse(&info, pathToLocalList)
-	info.ShowAll()
+	//info.ShowAll()
+
+	info.GetListOfCity()
 
 	return &info
 }

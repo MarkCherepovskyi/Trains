@@ -3,5 +3,7 @@ package main
 import "DL/trains/pkg"
 
 func main() {
-	pkg.ModelInit()
+	info := pkg.ModelInit()
+	pkg.InitTSP(info)
+	pkg.Do()
 }
