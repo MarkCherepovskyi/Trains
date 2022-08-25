@@ -2,8 +2,6 @@ package main
 
 import (
 	"DL/trains/pkg"
-	"context"
-	"sync"
 )
 
 func main() {
@@ -11,12 +9,9 @@ func main() {
 
 	pkg.InitTSP(info)
 
-	pkg.InitTSP2(info)
-	context.Background()
-	wt := sync.WaitGroup{}
-	wt.Add(2)
-	go pkg.DoTSPbyTime(&wt)
-	go pkg.Do(&wt)
-	wt.Wait()
+	//pkg.InitTSP2(info)
+
+	//go pkg.DoTSPbyTime(&wt)
+	pkg.Do()
 
 }

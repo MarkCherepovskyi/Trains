@@ -152,10 +152,10 @@ func (info *Info) GetListOfCity() []int {
 	return list
 }
 
-func GetTimeInWay(departures, arrival int) int {
-	timeInWay := arrival - departures
+func GetTimeInWay(train Train) int {
+	timeInWay := train.ArrivalTime - train.DeparturesTime
 	if timeInWay <= 0 {
-		timeInWay = arrival + MinInDay - departures
+		timeInWay = timeInWay + MinInDay
 	}
 	return timeInWay
 }
