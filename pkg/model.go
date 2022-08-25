@@ -63,7 +63,7 @@ func parse(info *Info, pathToList string) {
 				}
 				tr.Price = float32(parseFloat)
 			} else if strings.Contains(str, ":") {
-				fmt.Println(str)
+
 				if tr.DeparturesTime == 0 {
 					tr.DeparturesTime = strToTime(string(str[:]))
 				}
@@ -131,6 +131,10 @@ func (info *Info) ShowAll() {
 	}
 }
 
+func (info *Info) ShowListOfCity() {
+	fmt.Println(info.GetListOfCity())
+}
+
 func (info *Info) GetListOfCity() []int {
 	list := make([]int, 0)
 	for i := 0; i < len(info.Trains); i++ {
@@ -145,8 +149,15 @@ func (info *Info) GetListOfCity() []int {
 			list = append(list, info.Trains[i].ArrivalStation)
 		}
 	}
-	fmt.Println(list)
 	return list
+}
+
+func GetTimeInWay(departures, arrival int) int {
+	timeInWay := arrival - departures
+	if timeInWay <= 0 {
+		timeInWay = arrival + MinInDay - departures
+	}
+	return timeInWay
 }
 
 func (info *Info) GetMinPrice(departures, arrival int) (float32, Train) {
@@ -162,6 +173,33 @@ func (info *Info) GetMinPrice(departures, arrival int) (float32, Train) {
 	}
 
 	return min, trainWithMinPrice
+}
+
+func GetTimeInStation(tr1, tr2 Train) int {
+
+	timeInStation := tr2.DeparturesTime - tr1.ArrivalTime
+	if timeInStation <= 0 {
+		timeInStation = timeInStation + MinInDay
+	}
+	return timeInStation
+
+}
+
+func (info *Info) GetTrains(departures, arrival int) []Train {
+	listOfTrains := make([]Train, 0)
+	for _, tr := range info.Trains {
+		if tr.DeparturesStation == departures && tr.ArrivalStation == arrival {
+			listOfTrains = append(listOfTrains, tr)
+		}
+	}
+	return listOfTrains
+}
+
+func (info *Info) minInDays(time int) string {
+	days := time / MinInDay
+	hours := (time % MinInDay) / 60
+	min := time - (days*MinInDay + hours*60)
+	return fmt.Sprint(days, " days ", hours, " hours ", min, " min")
 }
 
 func ModelInit() *Info {

@@ -1,6 +1,9 @@
 package pkg
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 var (
 	firstStation int
@@ -9,18 +12,18 @@ var (
 	info         *Info
 	roads        []path
 	minPath      float32 = 10000
-	counter              = 0
+	counter      int     = 0
 	minCounter   int
 	bestPath     string
 	bestPrice    float32
-
-	distance    [][]float32
-	cheapTrains []Train
+	distance     [][]float32
+	cheapTrains  []Train
 )
 
 type path struct {
-	len  float32
-	path string
+	price float32
+	time  int
+	path  string
 }
 
 func InitTSP(inf *Info) {
@@ -39,10 +42,10 @@ func InitTSP(inf *Info) {
 			cheapTrains = append(cheapTrains, tr)
 		}
 	}
-
 }
 
-func Do() {
+func Do(wt *sync.WaitGroup) {
+
 	for i1 := 0; i1 < 6; i1++ {
 		for i2 := 0; i2 < 6; i2++ {
 			for i3 := 0; i3 < 6; i3++ {
@@ -52,14 +55,14 @@ func Do() {
 							if i1 != i2 && i1 != i3 && i1 != i4 && i1 != i5 && i1 != i6 && i2 != i3 && i2 != i4 && i2 != i5 && i2 != i6 && i3 != i4 && i3 != i5 && i3 != i6 && i4 != i5 && i4 != i6 && i5 != i6 {
 								pt := path{}
 								pt.path = fmt.Sprint(list[i1], " -", findNumberOfTrain(list[i1], list[i2]), "> ", list[i2], " -", findNumberOfTrain(list[i2], list[i3]), "> ", list[i3], " -", findNumberOfTrain(list[i3], list[i4]), "> ", list[i4], " -", findNumberOfTrain(list[i4], list[i5]), "> ", list[i5], " -", findNumberOfTrain(list[i5], list[i6]), "> ", list[i6])
-								if findNumberOfTrain(list[i1], list[i2]) == 1000000 || findNumberOfTrain(list[i2], list[i3]) == 1000000 || findNumberOfTrain(list[i3], list[i4]) == 1000000 || findNumberOfTrain(list[i4], list[i5]) == 1000000 || findNumberOfTrain(list[i5], list[i6]) == 1000000 {
+								if findNumberOfTrain(list[i1], list[i2]) == inf || findNumberOfTrain(list[i2], list[i3]) == inf || findNumberOfTrain(list[i3], list[i4]) == inf || findNumberOfTrain(list[i4], list[i5]) == inf || findNumberOfTrain(list[i5], list[i6]) == inf {
 									continue
 								}
 								if distance[i1][i2]+distance[i2][i3]+distance[i3][i4]+distance[i4][i5]+distance[i5][i6] < minPath {
 									minPath = distance[i1][i2] + distance[i2][i3] + distance[i3][i4] + distance[i4][i5] + distance[i5][i6]
 									minCounter = counter
 									bestPath = pt.path
-									pt.len = minPath
+									pt.price = minPath
 									bestPrice = minPath
 									roads = append(roads, pt)
 								}
@@ -71,8 +74,10 @@ func Do() {
 			}
 		}
 	}
+
 	fmt.Println(bestPath)
 	fmt.Println(bestPrice)
+	wt.Done()
 }
 
 func findNumberOfTrain(departures, arrival int) int {
@@ -81,5 +86,5 @@ func findNumberOfTrain(departures, arrival int) int {
 			return st.NumOfTrain
 		}
 	}
-	return 1000000
+	return inf
 }
