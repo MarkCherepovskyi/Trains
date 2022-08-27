@@ -18,13 +18,10 @@ var (
 	distanceByPrice [][]float32
 	cheapTrains     []Train
 
-	switcher = 1
+	switcher = 2
 
 	indexes       []int
 	indexesByTime []Train
-
-	localTime int
-	max       int
 )
 
 const (
@@ -85,12 +82,11 @@ func Do() {
 	indexesByTime = make([]Train, len(list)-1)
 
 	recursion(i, j)
-	fmt.Println(bestPath)
-	fmt.Println(bestPrice)
-	fmt.Println(info.minInDays(minTime))
-	fmt.Println(minCounter)
-	fmt.Println(info.minInDays(localTime))
-	fmt.Println(max)
+	fmt.Println("best path = ", bestPath)
+	fmt.Println("price of the best path = ", bestPrice)
+	fmt.Println("time in way = ", info.minInDays(minTime))
+	fmt.Println("attempt number = ", minCounter)
+
 }
 
 func recursion(i, j int) {
@@ -124,139 +120,10 @@ func recursion(i, j int) {
 
 		if bufferAccess {
 			if switcher == 1 {
-				pt := path{}
-				bufferInnerAccess := true
-				for k := 0; k < len(list)-1; k++ {
-					if findNumberOfTrain(list[indexes[k]], list[indexes[k+1]]) == inf {
-						bufferInnerAccess = false
-						break
-					}
-
-				}
-				if !bufferInnerAccess {
-					continue
-				}
-
-				for k := 0; k < len(list); k++ {
-					if k < len(list)-1 {
-						pt.path += fmt.Sprint(list[indexes[k]], " --", findNumberOfTrain(list[indexes[k]], list[indexes[k+1]]), "-> ")
-					} else {
-						pt.path += fmt.Sprint(list[indexes[k]])
-					}
-				}
-
-				for k := 0; k < len(list)-1; k++ {
-					pt.price += distanceByPrice[indexes[k]][indexes[k+1]]
-				}
-
-				if pt.price < minPath {
-					minPath = pt.price
-					minCounter = counter
-					bestPath = pt.path
-					pt.price = minPath
-					//				localTime = GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[0]][indexes[1]], list[0], list[1])) + GetTimeInStation(findTrainByPrice(cheapTrains, distanceByPrice[indexes[0]][indexes[1]], list[0], list[1]), findTrainByPrice(cheapTrains, distanceByPrice[indexes[1]][indexes[2]], list[1], list[2])) + GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[1]][indexes[2]], list[1], list[2])) + GetTimeInStation(findTrainByPrice(cheapTrains, distanceByPrice[indexes[1]][indexes[2]], list[1], list[2]), findTrainByPrice(cheapTrains, distanceByPrice[indexes[2]][indexes[3]], list[2], list[3])) + GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[2]][indexes[3]], list[2], list[3])) + GetTimeInStation(findTrainByPrice(cheapTrains, distanceByPrice[indexes[2]][indexes[3]], list[2], list[3]), findTrainByPrice(cheapTrains, distanceByPrice[indexes[3]][indexes[4]], list[3], list[4])) + GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[3]][indexes[4]], list[3], list[4])) + GetTimeInStation(findTrainByPrice(cheapTrains, distanceByPrice[indexes[3]][indexes[4]], list[3], list[4]), findTrainByPrice(cheapTrains, distanceByPrice[indexes[4]][indexes[5]], list[4], list[5])) + GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[4]][indexes[5]], list[4], list[5]))
-
-					for k := 0; k < len(list)-1; k++ {
-
-						if k < len(list)-2 {
-							pt.time += GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[k]][indexes[k+1]], list[indexes[k]], list[indexes[k+1]])) + GetTimeInStation(findTrainByPrice(cheapTrains, distanceByPrice[indexes[k]][indexes[k+1]], list[indexes[k]], list[indexes[k+1]]), findTrainByPrice(cheapTrains, distanceByPrice[indexes[k+1]][indexes[k+2]], list[indexes[k+1]], list[indexes[k+2]]))
-						} else {
-							pt.time += GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[k]][indexes[k+1]], list[indexes[k]], list[indexes[k+1]]))
-						}
-
-					}
-
-					minTime = pt.time
-					bestPrice = minPath
-					roads = append(roads, pt)
-				}
-				counter++
+				findTheBestPrice()
 			} else if switcher == 2 {
-				bestTime(j)
-
+				findTheBestTime(j)
 			}
 		}
 	}
-}
-
-func findNumberOfTrain(departures, arrival int) int {
-	for _, st := range cheapTrains {
-		if st.ArrivalStation == arrival && st.DeparturesStation == departures {
-			return st.NumOfTrain
-		}
-	}
-	return inf
-}
-
-func bestTime(i int) {
-
-	for _, indexesByTime[i] = range distanceByTime[indexes[i]][indexes[i+1]].trs {
-
-		if i < len(indexesByTime)-1 {
-			bestTime(i + 1)
-		}
-
-		max++
-		bufferInnerAccess := true
-		for k := 0; k < len(list)-1; k++ {
-			if findNumberOfTrain(list[indexes[k]], list[indexes[k+1]]) == inf {
-				bufferInnerAccess = false
-				break
-			}
-
-		}
-		if !bufferInnerAccess {
-			continue
-		}
-
-		pt := path{}
-		checkTrain := true
-		for k := 0; k < len(list); k++ {
-			if k < len(list)-1 {
-				if indexesByTime[k].NumOfTrain == 0 {
-					checkTrain = false
-					break
-				}
-				pt.path += fmt.Sprint(list[indexes[k]], " --", indexesByTime[k].NumOfTrain, "-> ")
-			} else {
-				pt.path += fmt.Sprint(list[indexes[k]])
-			}
-		}
-
-		if !checkTrain {
-			continue
-		}
-
-		//pt.time = GetTimeInWay(indexesByTime[0]) + GetTimeInStation(indexesByTime[0], indexesByTime[1]) + GetTimeInWay(indexesByTime[1]) + GetTimeInStation(indexesByTime[1], indexesByTime[2]) + GetTimeInWay(indexesByTime[2]) + GetTimeInStation(indexesByTime[2], indexesByTime[3]) + GetTimeInWay(indexesByTime[3]) + GetTimeInStation(indexesByTime[3], indexesByTime[4]) + GetTimeInWay(indexesByTime[4])
-
-		//Исправить этот цикл
-		//for k := 0; k < len(list)-1; k++ {
-		//	pt.time += GetTimeInWay(findTrainByPrice(cheapTrains, distanceByPrice[indexes[k]][indexes[k+1]]))
-		//	if k != len(list)-2 {
-		//		pt.time += GetTimeInStation(findTrainByPrice(cheapTrains, distanceByPrice[indexes[k]][indexes[k+1]]), findTrainByPrice(cheapTrains, distanceByPrice[k+1][indexes[k+2]]))
-		//	}
-		//}
-
-		//pt.path = fmt.Sprint(list[indexes[0]], " --", indexesByTime[0].NumOfTrain, "-> ", list[indexes[1]], " --", indexesByTime[1].NumOfTrain, "-> ", list[indexes[2]], " --", indexesByTime[2].NumOfTrain, "-> ", list[indexes[3]], " --", indexesByTime[3].NumOfTrain, "-> ", list[indexes[4]], " --", indexesByTime[4].NumOfTrain, "-> ", list[indexes[5]])
-
-		if pt.time < minTime {
-			minTime = pt.time
-			bestPrice = indexesByTime[0].Price + indexesByTime[1].Price + indexesByTime[2].Price + indexesByTime[3].Price + indexesByTime[4].Price
-			minCounter = counter
-			bestPath = pt.path
-
-			roads = append(roads, pt)
-		}
-		counter++
-	}
-
-}
-
-func findTrainByPrice(list []Train, price float32, departures, arrival int) Train {
-	for _, tr := range list {
-		if tr.Price == price && tr.ArrivalStation == arrival && tr.DeparturesStation == departures {
-			return tr
-		}
-	}
-	return Train{}
 }
